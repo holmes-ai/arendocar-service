@@ -2,7 +2,7 @@
   "name": "arendocar-service",
   "private": true,
   "version": "0.0.0",
-  "homepage": "https://axmedxonov.github.io/arendocar-service/",
+  "homepage": "https://holmes-ai.github.io/arendocar-service/",
   "type": "module",
   "scripts": {
     "dev": "vite",
