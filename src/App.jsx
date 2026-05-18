@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 
 import {
@@ -7,10 +7,20 @@ import {
   Car,
   User,
   AlertTriangle,
-  Clock,
-  CheckCircle2,
+  Clock3,
+  ShieldCheck,
+  Search,
   Phone,
-  MapPin
+  MapPin,
+  CheckCircle2,
+  ChevronRight,
+  Settings2,
+  Bell,
+  Star,
+  Gauge,
+  CalendarDays,
+  CreditCard,
+  BatteryCharging
 } from 'lucide-react'
 
 const services = [
@@ -19,8 +29,8 @@ const services = [
     title: 'Замена масла',
     duration: '1 час',
     estimate: '$120',
-    description: 'Полная замена масла и масляного фильтра',
-    category: 'ТО'
+    category: 'ТО',
+    description: 'Полная замена масла и фильтров'
   },
 
   {
@@ -28,8 +38,8 @@ const services = [
     title: 'Диагностика двигателя',
     duration: '2 часа',
     estimate: '$250',
-    description: 'Компьютерная диагностика и проверка двигателя',
-    category: 'Диагностика'
+    category: 'Диагностика',
+    description: 'Компьютерная диагностика двигателя'
   },
 
   {
@@ -37,8 +47,8 @@ const services = [
     title: 'Тормозная система',
     duration: '3 часа',
     estimate: '$340',
-    description: 'Замена тормозных колодок и обслуживание системы',
-    category: 'Ремонт'
+    category: 'Ремонт',
+    description: 'Обслуживание тормозной системы'
   },
 
   {
@@ -46,158 +56,313 @@ const services = [
     title: 'Ремонт подвески',
     duration: '5 часов',
     estimate: '$680',
-    description: 'Проверка и ремонт подвески автомобиля',
-    category: 'Ремонт'
+    category: 'Подвеска',
+    description: 'Полная проверка подвески'
   }
 ]
 
-const myCars = [
+const cars = [
   {
     id: 1,
-    brand: 'BMW',
-    model: 'M5 F90',
+    name: 'Ferrari SF90',
     plate: '01A777AA',
     mileage: '58 000 км',
-    nextService: 'Замена масла через 1200 км'
+    status: 'Готова к диагностике',
+    image:
+      'https://images.unsplash.com/photo-1583121274602-3e2820c69888?q=80&w=1200&auto=format&fit=crop'
   },
 
   {
     id: 2,
-    brand: 'Mercedes',
-    model: 'AMG GT',
+    name: 'BMW M5 Competition',
     plate: '10B505BB',
     mileage: '32 000 км',
-    nextService: 'Скоро обслуживание тормозов'
+    status: 'Следующее ТО через 900 км',
+    image:
+      'https://images.unsplash.com/photo-1555215695-3004980ad54e?q=80&w=1200&auto=format&fit=crop'
   }
+]
+
+const categories = [
+  'Все',
+  'ТО',
+  'Диагностика',
+  'Ремонт',
+  'Подвеска'
 ]
 
 export default function App() {
 
   const [activeTab, setActiveTab] = useState('home')
 
+  const [selectedCategory, setSelectedCategory] = useState('Все')
+
+  const [searchTerm, setSearchTerm] = useState('')
+
   const [selectedService, setSelectedService] = useState(null)
-
-  const [bookingStep, setBookingStep] = useState(1)
-
-  const [selectedCar, setSelectedCar] = useState('BMW M5 F90')
 
   const [selectedTime, setSelectedTime] = useState('12:00')
 
-  const [bookingConfirmed, setBookingConfirmed] = useState(false)
-
-  const [profileModal, setProfileModal] = useState(null)
-
-  const [repairApproved, setRepairApproved] = useState(false)
+  const [selectedCar, setSelectedCar] = useState('Ferrari SF90')
 
   const [emergencyModal, setEmergencyModal] = useState(false)
 
-  const [toast, setToast] = useState('')
+  const currentHour = new Date().getHours()
 
-  const showToast = (text) => {
+  const greeting =
+    currentHour < 12
+      ? 'Доброе утро'
+      : currentHour < 18
+      ? 'Добрый день'
+      : 'Добрый вечер'
 
-    setToast(text)
+  const filteredServices = useMemo(() => {
 
-    setTimeout(() => {
-      setToast('')
-    }, 2500)
-  }
+    return services.filter((service) => {
+
+      const matchesSearch =
+        service.title
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase())
+
+      const matchesCategory =
+        selectedCategory === 'Все'
+          ? true
+          : service.category === selectedCategory
+
+      return matchesSearch && matchesCategory
+
+    })
+
+  }, [searchTerm, selectedCategory])
 
   return (
 
-    <div className="bg-black min-h-screen text-white flex justify-center">
+    <div className="min-h-screen bg-[#EAF1F9] flex justify-center overflow-hidden">
 
-      <div className="w-full max-w-[430px] min-h-screen bg-[#0A0A0A] pb-28 relative overflow-hidden">
+      <div className="w-full max-w-[430px] min-h-screen relative overflow-hidden pb-32">
 
-        <div className="absolute top-[-100px] left-[-100px] w-[250px] h-[250px] bg-red-500/20 blur-[120px] rounded-full"></div>
+        {/* BG BLUR */}
 
-        <div className="absolute bottom-[-100px] right-[-100px] w-[250px] h-[250px] bg-orange-500/10 blur-[120px] rounded-full"></div>
+        <div className="absolute top-[-140px] right-[-100px] w-[320px] h-[320px] bg-blue-300/30 blur-[120px]" />
 
-        <div className="p-5 relative z-10">
+        <div className="absolute bottom-[-160px] left-[-120px] w-[320px] h-[320px] bg-cyan-200/40 blur-[120px]" />
 
-          {
-            activeTab === 'home' && (
+        {/* HOME */}
+
+        {
+          activeTab === 'home' && (
+
+            <div className="px-5 pt-5">
+
+              {/* HERO */}
 
               <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="relative overflow-hidden rounded-[42px] bg-gradient-to-br from-[#3B82F6] to-[#2563EB] min-h-[340px] p-6 shadow-[0_30px_80px_rgba(37,99,235,0.35)]"
               >
 
-                <div className="mb-8">
+                <div className="relative z-10">
 
-                  <p className="text-zinc-500 text-sm">
-                    Премиум Автосервис
-                  </p>
-
-                  <h1 className="text-3xl font-bold mt-2">
-                    Arendocar Service
-                  </h1>
-
-                </div>
-
-                <div className="bg-[#181818] border border-zinc-800 rounded-[30px] p-5 mb-6">
-
-                  <div className="flex items-center gap-3">
-
-                    <Clock className="text-orange-400" />
+                  <div className="flex items-center justify-between">
 
                     <div>
 
-                      <p className="text-zinc-500 text-sm">
-                        Активный ремонт
+                      <p className="text-white/70 tracking-wide text-sm">
+                        PREMIUM AUTO SERVICE
                       </p>
 
-                      <h2 className="text-xl font-semibold mt-1">
-                        Диагностика BMW M5
-                      </h2>
+                      <h1 className="text-[38px] leading-[42px] font-bold text-white mt-4">
+
+                        {greeting},
+                        <br />
+                        Иброхим
+
+                      </h1>
 
                     </div>
+
+                    <div className="w-14 h-14 rounded-full bg-white/10 backdrop-blur-[40px] border border-white/20" />
 
                   </div>
 
-                  <div className="mt-6">
+                  <div className="mt-10 bg-white/10 backdrop-blur-[60px] border border-white/20 rounded-[32px] p-5 shadow-[0_10px_40px_rgba(255,255,255,0.12)]">
 
-                    <div className="flex items-center justify-between mb-2">
+                    <p className="text-white/70 text-sm">
+                      Активный автомобиль
+                    </p>
 
-                      <p className="text-sm">
-                        Прогресс ремонта
-                      </p>
+                    <h2 className="text-3xl font-bold text-white mt-2">
+                      Ferrari SF90
+                    </h2>
 
-                      <p className="text-sm text-zinc-500">
-                        70%
-                      </p>
-
-                    </div>
-
-                    <div className="w-full bg-zinc-800 rounded-full h-2">
-
-                      <div className="bg-white h-2 rounded-full w-[70%]"></div>
-
-                    </div>
+                    <p className="text-white/70 mt-2">
+                      Готова к диагностике
+                    </p>
 
                   </div>
 
                 </div>
 
+                <img
+                  src="https://images.unsplash.com/photo-1583121274602-3e2820c69888?q=80&w=1200&auto=format&fit=crop"
+                  className="absolute right-[-30px] bottom-0 w-[290px] object-cover"
+                />
+
+              </motion.div>
+
+              {/* SEARCH */}
+
+              <div className="mt-6 bg-white/20 backdrop-blur-[60px] border border-white/30 rounded-[30px] p-4 shadow-[0_10px_30px_rgba(255,255,255,0.15)]">
+
+                <div className="flex items-center gap-3">
+
+                  <Search className="text-zinc-500" />
+
+                  <input
+                    type="text"
+                    placeholder="Поиск услуг..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="bg-transparent outline-none w-full text-black placeholder:text-zinc-500"
+                  />
+
+                </div>
+
+              </div>
+
+              {/* CATEGORIES */}
+
+              <div className="flex gap-3 overflow-x-auto mt-5 pb-2">
+
+                {
+                  categories.map((category) => (
+
+                    <button
+                      key={category}
+                      onClick={() => setSelectedCategory(category)}
+                      className={`px-5 py-3 rounded-2xl whitespace-nowrap transition-all backdrop-blur-[50px] border ${
+                        selectedCategory === category
+                          ? 'bg-[#2563EB] text-white border-[#2563EB]'
+                          : 'bg-white/20 text-black border-white/30'
+                      }`}
+                    >
+                      {category}
+                    </button>
+
+                  ))
+                }
+
+              </div>
+
+              {/* STATS */}
+
+              <div className="grid grid-cols-2 gap-4 mt-6">
+
+                <div className="bg-white/20 backdrop-blur-[60px] border border-white/30 rounded-[32px] p-5 shadow-xl">
+
+                  <ShieldCheck className="text-green-500" />
+
+                  <p className="text-zinc-500 text-sm mt-5">
+                    Состояние
+                  </p>
+
+                  <h2 className="text-4xl font-bold text-black mt-3">
+                    92%
+                  </h2>
+
+                  <p className="text-green-500 mt-2">
+                    Отличное
+                  </p>
+
+                </div>
+
+                <div className="bg-white/20 backdrop-blur-[60px] border border-white/30 rounded-[32px] p-5 shadow-xl">
+
+                  <Gauge className="text-blue-500" />
+
+                  <p className="text-zinc-500 text-sm mt-5">
+                    Пробег
+                  </p>
+
+                  <h2 className="text-4xl font-bold text-black mt-3">
+                    58k
+                  </h2>
+
+                  <p className="text-zinc-500 mt-2">
+                    Общий пробег
+                  </p>
+
+                </div>
+
+              </div>
+
+              {/* ACTIONS */}
+
+              <div className="grid grid-cols-2 gap-4 mt-6">
+
                 <button
-                  onClick={() => setEmergencyModal(true)}
-                  className="w-full bg-red-500 py-4 rounded-2xl font-semibold flex items-center justify-center gap-2 mb-8"
+                  onClick={() => alert('Открыта запись')}
+                  className="bg-[#2563EB] text-white rounded-[32px] p-5 shadow-[0_25px_50px_rgba(37,99,235,0.35)]"
                 >
 
-                  <AlertTriangle size={20} />
+                  <div className="w-14 h-14 rounded-2xl bg-white/10 backdrop-blur-[50px] border border-white/20 flex items-center justify-center">
 
-                  Экстренная помощь
+                    <Wrench />
+
+                  </div>
+
+                  <h2 className="text-2xl font-bold mt-6 text-left">
+                    Записаться
+                  </h2>
+
+                  <p className="text-white/70 mt-2 text-left">
+                    Выбрать услугу
+                  </p>
 
                 </button>
+
+                <button
+                  onClick={() => setEmergencyModal(true)}
+                  className="bg-red-500 text-white rounded-[32px] p-5 shadow-[0_25px_50px_rgba(239,68,68,0.35)]"
+                >
+
+                  <div className="w-14 h-14 rounded-2xl bg-white/10 backdrop-blur-[50px] border border-white/20 flex items-center justify-center">
+
+                    <AlertTriangle />
+
+                  </div>
+
+                  <h2 className="text-2xl font-bold mt-6 text-left">
+                    SOS
+                  </h2>
+
+                  <p className="text-white/70 mt-2 text-left">
+                    Экстренная помощь
+                  </p>
+
+                </button>
+
+              </div>
+
+              {/* SERVICES */}
+
+              <div className="mt-8">
+
+                <h2 className="text-2xl font-bold text-black mb-5">
+                  Популярные услуги
+                </h2>
 
                 <div className="space-y-5">
 
                   {
-                    services.map((service) => (
+                    filteredServices.map((service) => (
 
                       <motion.div
-                        whileTap={{ scale: 0.98 }}
                         key={service.id}
-                        className="bg-[#181818] border border-zinc-800 rounded-[30px] p-5"
+                        whileTap={{ scale: 0.98 }}
+                        className="bg-white/20 backdrop-blur-[60px] border border-white/30 rounded-[34px] p-5 shadow-xl"
                       >
 
                         <div className="flex items-start justify-between">
@@ -208,7 +373,7 @@ export default function App() {
                               {service.category}
                             </p>
 
-                            <h2 className="text-2xl font-bold mt-2">
+                            <h2 className="text-2xl font-bold text-black mt-2">
                               {service.title}
                             </h2>
 
@@ -216,7 +381,7 @@ export default function App() {
 
                           <div className="text-right">
 
-                            <p className="font-semibold">
+                            <p className="text-xl font-bold text-black">
                               {service.estimate}
                             </p>
 
@@ -228,16 +393,13 @@ export default function App() {
 
                         </div>
 
-                        <p className="text-zinc-400 mt-5">
+                        <p className="text-zinc-500 mt-5">
                           {service.description}
                         </p>
 
                         <button
-                          onClick={() => {
-                            setSelectedService(service)
-                            setBookingStep(1)
-                          }}
-                          className="w-full bg-white text-black py-4 rounded-2xl font-semibold mt-6"
+                          onClick={() => setSelectedService(service)}
+                          className="w-full mt-6 bg-[#2563EB] text-white py-4 rounded-2xl font-semibold"
                         >
                           Записаться
                         </button>
@@ -249,146 +411,133 @@ export default function App() {
 
                 </div>
 
-              </motion.div>
+              </div>
 
-            )
-          }
+            </div>
 
-          {
-            activeTab === 'repair' && (
+          )
+        }
 
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-              >
+        {/* REPAIR */}
 
-                <h1 className="text-3xl font-bold mb-8">
-                  Статус ремонта
-                </h1>
+        {
+          activeTab === 'repair' && (
 
-                <div className="space-y-5">
+            <div className="px-5 pt-5">
 
-                  <div className="bg-[#181818] rounded-[30px] p-5 border border-zinc-800">
+              <h1 className="text-3xl font-bold text-black">
+                Статус ремонта
+              </h1>
 
-                    <div className="flex items-center gap-3">
+              <div className="space-y-5 mt-8">
 
-                      <CheckCircle2 className="text-green-500" />
+                <div className="bg-white/20 backdrop-blur-[60px] border border-white/30 rounded-[34px] p-5">
 
-                      <p>Автомобиль принят</p>
+                  <div className="flex items-center gap-4">
 
-                    </div>
+                    <CheckCircle2 className="text-green-500" />
 
-                  </div>
+                    <div>
 
-                  <div className="bg-[#181818] rounded-[30px] p-5 border border-zinc-800">
+                      <h2 className="font-bold text-black">
+                        Автомобиль принят
+                      </h2>
 
-                    <div className="flex items-center gap-3">
-
-                      <CheckCircle2 className="text-green-500" />
-
-                      <p>Диагностика завершена</p>
+                      <p className="text-zinc-500 mt-1">
+                        Ferrari SF90
+                      </p>
 
                     </div>
 
                   </div>
 
-                  <div className="bg-[#181818] rounded-[30px] p-5 border border-orange-500">
+                </div>
 
-                    <h2 className="text-xl font-bold">
-                      Требуется подтверждение
-                    </h2>
+                <div className="bg-white/20 backdrop-blur-[60px] border border-white/30 rounded-[34px] p-5">
 
-                    <p className="text-zinc-400 mt-3">
-                      Обнаружена проблема в передней подвеске.
-                    </p>
+                  <div className="flex items-center gap-4">
 
-                    <p className="text-2xl font-bold mt-5">
-                      $420
-                    </p>
+                    <BatteryCharging className="text-blue-500" />
 
-                    {
-                      !repairApproved ? (
+                    <div>
 
-                        <div className="flex gap-3 mt-6">
+                      <h2 className="font-bold text-black">
+                        Диагностика
+                      </h2>
 
-                          <button
-                            onClick={() => {
-                              setRepairApproved(true)
-                              showToast('Ремонт подтвержден')
-                            }}
-                            className="flex-1 bg-white text-black py-3 rounded-2xl font-semibold"
-                          >
-                            Подтвердить
-                          </button>
+                      <p className="text-zinc-500 mt-1">
+                        Выполняется
+                      </p>
 
-                          <button
-                            onClick={() => showToast('Запрос отклонен')}
-                            className="flex-1 bg-zinc-800 py-3 rounded-2xl font-semibold"
-                          >
-                            Отклонить
-                          </button>
-
-                        </div>
-
-                      ) : (
-
-                        <div className="bg-green-500/20 border border-green-500 rounded-2xl p-4 mt-6">
-
-                          Ремонт успешно подтвержден
-
-                        </div>
-
-                      )
-                    }
+                    </div>
 
                   </div>
 
                 </div>
 
-              </motion.div>
+                <div className="bg-white/20 backdrop-blur-[60px] border border-white/30 rounded-[34px] p-5">
 
-            )
-          }
+                  <div className="flex items-center justify-between">
 
-          {
-            activeTab === 'cars' && (
+                    <div>
 
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-              >
+                      <h2 className="font-bold text-black">
+                        Следующее ТО
+                      </h2>
 
-                <div className="flex items-center justify-between mb-8">
+                      <p className="text-zinc-500 mt-2">
+                        Через 14 дней
+                      </p>
 
-                  <h1 className="text-3xl font-bold">
-                    Мои автомобили
-                  </h1>
+                    </div>
 
-                  <button
-                    onClick={() => showToast('Новый автомобиль добавлен')}
-                    className="bg-white text-black px-4 py-2 rounded-xl text-sm font-semibold"
-                  >
-                    Добавить
-                  </button>
+                    <CalendarDays className="text-blue-500" />
+
+                  </div>
 
                 </div>
 
-                <div className="space-y-5">
+              </div>
 
-                  {
-                    myCars.map((car) => (
+            </div>
 
-                      <div
-                        key={car.id}
-                        className="bg-[#181818] rounded-[30px] p-5 border border-zinc-800"
-                      >
+          )
+        }
+
+        {/* CARS */}
+
+        {
+          activeTab === 'cars' && (
+
+            <div className="px-5 pt-5">
+
+              <h1 className="text-3xl font-bold text-black">
+                Мои автомобили
+              </h1>
+
+              <div className="space-y-5 mt-8">
+
+                {
+                  cars.map((car) => (
+
+                    <div
+                      key={car.id}
+                      className="bg-white/20 backdrop-blur-[60px] border border-white/30 rounded-[34px] overflow-hidden shadow-xl"
+                    >
+
+                      <img
+                        src={car.image}
+                        className="w-full h-[220px] object-cover"
+                      />
+
+                      <div className="p-5">
 
                         <div className="flex items-center justify-between">
 
                           <div>
 
-                            <h2 className="text-2xl font-bold">
-                              {car.brand} {car.model}
+                            <h2 className="text-2xl font-bold text-black">
+                              {car.name}
                             </h2>
 
                             <p className="text-zinc-500 mt-2">
@@ -397,138 +546,222 @@ export default function App() {
 
                           </div>
 
-                          <Car size={28} />
+                          <ChevronRight className="text-zinc-400" />
 
                         </div>
 
-                        <div className="mt-6 space-y-2">
+                        <div className="mt-5">
 
-                          <p className="text-zinc-400">
-                            Пробег: {car.mileage}
+                          <p className="text-black font-medium">
+                            {car.mileage}
                           </p>
 
-                          <p className="text-orange-400">
-                            {car.nextService}
+                          <p className="text-zinc-500 mt-2">
+                            {car.status}
                           </p>
 
                         </div>
 
                       </div>
 
-                    ))
-                  }
+                    </div>
+
+                  ))
+                }
+
+              </div>
+
+            </div>
+
+          )
+        }
+
+        {/* PROFILE */}
+
+        {
+          activeTab === 'profile' && (
+
+            <div className="px-5 pt-5">
+
+              <div className="bg-white/20 backdrop-blur-[60px] border border-white/30 rounded-[34px] p-6 shadow-xl">
+
+                <div className="flex items-center gap-5">
+
+                  <div className="w-20 h-20 rounded-full bg-gradient-to-br from-blue-500 to-cyan-400" />
+
+                  <div>
+
+                    <h2 className="text-3xl font-bold text-black">
+                      Иброхим
+                    </h2>
+
+                    <p className="text-zinc-500 mt-2">
+                      Premium Client
+                    </p>
+
+                  </div>
 
                 </div>
 
-              </motion.div>
+              </div>
 
-            )
-          }
+              <div className="space-y-4 mt-6">
 
-          {
-            activeTab === 'profile' && (
+                <button
+                  onClick={() => alert('Уведомления открыты')}
+                  className="w-full bg-white/20 backdrop-blur-[60px] border border-white/30 rounded-[28px] p-5 flex items-center justify-between"
+                >
 
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-              >
+                  <div className="flex items-center gap-4">
 
-                <div className="flex flex-col items-center pt-5">
+                    <Bell />
 
-                  <div className="w-28 h-28 rounded-full bg-gradient-to-br from-red-500 to-orange-500 mb-5"></div>
+                    <span className="text-black">
+                      Уведомления
+                    </span>
 
-                  <h1 className="text-3xl font-bold">
-                    Ibrohim
-                  </h1>
+                  </div>
 
-                  <p className="text-zinc-500 mt-2">
-                    Premium Service Member
-                  </p>
+                  <ChevronRight />
 
-                </div>
+                </button>
 
-                <div className="space-y-4 mt-10">
+                <button
+                  onClick={() => alert('Premium активен')}
+                  className="w-full bg-white/20 backdrop-blur-[60px] border border-white/30 rounded-[28px] p-5 flex items-center justify-between"
+                >
 
-                  <button
-                    onClick={() => setProfileModal('history')}
-                    className="w-full bg-[#181818] border border-zinc-800 rounded-2xl p-5 text-left"
-                  >
-                    История обслуживания
-                  </button>
+                  <div className="flex items-center gap-4">
 
-                  <button
-                    onClick={() => setProfileModal('notifications')}
-                    className="w-full bg-[#181818] border border-zinc-800 rounded-2xl p-5 text-left"
-                  >
-                    Напоминания
-                  </button>
+                    <Star />
 
-                  <button
-                    onClick={() => setProfileModal('payments')}
-                    className="w-full bg-[#181818] border border-zinc-800 rounded-2xl p-5 text-left"
-                  >
-                    Способы оплаты
-                  </button>
+                    <span className="text-black">
+                      Premium статус
+                    </span>
 
-                </div>
+                  </div>
 
-              </motion.div>
+                  <ChevronRight />
 
-            )
-          }
+                </button>
 
-        </div>
+                <button
+                  onClick={() => alert('Настройки открыты')}
+                  className="w-full bg-white/20 backdrop-blur-[60px] border border-white/30 rounded-[28px] p-5 flex items-center justify-between"
+                >
 
-        <div className="fixed bottom-0 left-0 right-0 flex justify-center z-40">
+                  <div className="flex items-center gap-4">
 
-          <div className="w-full max-w-[430px] bg-[#111111]/95 backdrop-blur-xl border-t border-zinc-800 flex justify-around py-4">
+                    <Settings2 />
+
+                    <span className="text-black">
+                      Настройки
+                    </span>
+
+                  </div>
+
+                  <ChevronRight />
+
+                </button>
+
+                <button
+                  onClick={() => alert('Карты открыты')}
+                  className="w-full bg-white/20 backdrop-blur-[60px] border border-white/30 rounded-[28px] p-5 flex items-center justify-between"
+                >
+
+                  <div className="flex items-center gap-4">
+
+                    <CreditCard />
+
+                    <span className="text-black">
+                      Способы оплаты
+                    </span>
+
+                  </div>
+
+                  <ChevronRight />
+
+                </button>
+
+              </div>
+
+            </div>
+
+          )
+        }
+
+        {/* NAVBAR */}
+
+        <div className="fixed bottom-5 left-0 right-0 flex justify-center z-50">
+
+          <div className="w-[92%] max-w-[390px] bg-white/10 backdrop-blur-[80px] border border-white/20 rounded-[34px] py-4 px-6 flex justify-between shadow-[0_20px_60px_rgba(255,255,255,0.18)]">
 
             <button
               onClick={() => setActiveTab('home')}
               className={`flex flex-col items-center ${
                 activeTab === 'home'
-                  ? 'text-white'
+                  ? 'text-[#2563EB]'
                   : 'text-zinc-500'
               }`}
             >
+
               <Home size={22} />
-              <span className="text-xs mt-1">Главная</span>
+
+              <span className="text-xs mt-1">
+                Главная
+              </span>
+
             </button>
 
             <button
               onClick={() => setActiveTab('repair')}
               className={`flex flex-col items-center ${
                 activeTab === 'repair'
-                  ? 'text-white'
+                  ? 'text-[#2563EB]'
                   : 'text-zinc-500'
               }`}
             >
+
               <Wrench size={22} />
-              <span className="text-xs mt-1">Ремонт</span>
+
+              <span className="text-xs mt-1">
+                Ремонт
+              </span>
+
             </button>
 
             <button
               onClick={() => setActiveTab('cars')}
               className={`flex flex-col items-center ${
                 activeTab === 'cars'
-                  ? 'text-white'
+                  ? 'text-[#2563EB]'
                   : 'text-zinc-500'
               }`}
             >
+
               <Car size={22} />
-              <span className="text-xs mt-1">Авто</span>
+
+              <span className="text-xs mt-1">
+                Авто
+              </span>
+
             </button>
 
             <button
               onClick={() => setActiveTab('profile')}
               className={`flex flex-col items-center ${
                 activeTab === 'profile'
-                  ? 'text-white'
+                  ? 'text-[#2563EB]'
                   : 'text-zinc-500'
               }`}
             >
+
               <User size={22} />
-              <span className="text-xs mt-1">Профиль</span>
+
+              <span className="text-xs mt-1">
+                Профиль
+              </span>
+
             </button>
 
           </div>
@@ -536,6 +769,8 @@ export default function App() {
         </div>
 
       </div>
+
+      {/* BOOKING MODAL */}
 
       <AnimatePresence>
 
@@ -546,62 +781,51 @@ export default function App() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/90 z-50 flex items-end"
+              className="fixed inset-0 bg-black/10 backdrop-blur-md z-50 flex items-end"
             >
 
               <motion.div
                 initial={{ y: 500 }}
                 animate={{ y: 0 }}
                 exit={{ y: 500 }}
-                className="bg-[#111111] rounded-t-[40px] p-5 w-full max-w-[430px] mx-auto"
+                className="bg-white/20 backdrop-blur-[80px] border border-white/30 rounded-t-[42px] p-6 w-full max-w-[430px] mx-auto"
               >
 
-                <h2 className="text-3xl font-bold">
+                <div className="w-16 h-1.5 rounded-full bg-white/40 mx-auto mb-8" />
+
+                <h2 className="text-3xl font-bold text-black">
                   {selectedService.title}
                 </h2>
 
-                <p className="text-zinc-400 mt-4">
+                <p className="text-zinc-500 mt-2">
                   Оформление записи
                 </p>
 
-                <div className="space-y-4 mt-8">
+                <div className="space-y-5 mt-8">
 
-                  <div className={`rounded-2xl p-4 border ${
-                    bookingStep >= 1
-                      ? 'border-white'
-                      : 'border-zinc-800'
-                  }`}>
-                    Выбор услуги
-                  </div>
+                  <div className="bg-white/15 backdrop-blur-[60px] border border-white/20 rounded-[30px] p-5">
 
-                  <div className={`rounded-2xl p-4 border ${
-                    bookingStep >= 2
-                      ? 'border-white'
-                      : 'border-zinc-800'
-                  }`}>
-
-                    <p className="mb-3">
-                      Выберите автомобиль
+                    <p className="text-zinc-500 mb-4">
+                      Автомобиль
                     </p>
 
                     <select
                       value={selectedCar}
                       onChange={(e) => setSelectedCar(e.target.value)}
-                      className="w-full bg-black border border-zinc-700 rounded-xl p-3"
+                      className="w-full bg-white/40 rounded-2xl p-4 outline-none border border-white/20"
                     >
-                      <option>BMW M5 F90</option>
-                      <option>Mercedes AMG GT</option>
+
+                      <option>Ferrari SF90</option>
+
+                      <option>BMW M5 Competition</option>
+
                     </select>
 
                   </div>
 
-                  <div className={`rounded-2xl p-4 border ${
-                    bookingStep >= 3
-                      ? 'border-white'
-                      : 'border-zinc-800'
-                  }`}>
+                  <div className="bg-white/15 backdrop-blur-[60px] border border-white/20 rounded-[30px] p-5">
 
-                    <p className="mb-3">
+                    <p className="text-zinc-500 mb-4">
                       Выберите время
                     </p>
 
@@ -613,10 +837,10 @@ export default function App() {
                           <button
                             key={time}
                             onClick={() => setSelectedTime(time)}
-                            className={`px-4 py-2 rounded-xl ${
+                            className={`flex-1 py-4 rounded-2xl ${
                               selectedTime === time
-                                ? 'bg-white text-black'
-                                : 'bg-zinc-800'
+                                ? 'bg-[#2563EB] text-white'
+                                : 'bg-white/30 text-black'
                             }`}
                           >
                             {time}
@@ -629,48 +853,18 @@ export default function App() {
 
                   </div>
 
-                  <div className={`rounded-2xl p-4 border ${
-                    bookingStep >= 4
-                      ? 'border-white'
-                      : 'border-zinc-800'
-                  }`}>
-
-                    Подтверждение записи
-
-                  </div>
-
                 </div>
 
-                {
-                  bookingStep < 4 ? (
-
-                    <button
-                      onClick={() => setBookingStep(bookingStep + 1)}
-                      className="w-full bg-white text-black py-4 rounded-2xl font-semibold mt-8"
-                    >
-                      Продолжить
-                    </button>
-
-                  ) : (
-
-                    <button
-                      onClick={() => {
-                        setBookingConfirmed(true)
-                        setSelectedService(null)
-                        setActiveTab('repair')
-                        showToast('Запись успешно создана')
-                      }}
-                      className="w-full bg-green-500 text-white py-4 rounded-2xl font-semibold mt-8"
-                    >
-                      Подтвердить запись
-                    </button>
-
-                  )
-                }
+                <button
+                  onClick={() => alert('Запись подтверждена')}
+                  className="w-full mt-8 bg-[#2563EB] text-white py-4 rounded-2xl font-semibold"
+                >
+                  Продолжить
+                </button>
 
                 <button
                   onClick={() => setSelectedService(null)}
-                  className="w-full mt-4 text-zinc-500"
+                  className="w-full mt-5 text-zinc-500"
                 >
                   Закрыть
                 </button>
@@ -683,6 +877,8 @@ export default function App() {
         }
 
       </AnimatePresence>
+
+      {/* EMERGENCY */}
 
       <AnimatePresence>
 
@@ -693,184 +889,71 @@ export default function App() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-5"
+              className="fixed inset-0 bg-black/10 backdrop-blur-md z-50 flex items-center justify-center p-5"
             >
 
               <motion.div
                 initial={{ scale: 0.9 }}
                 animate={{ scale: 1 }}
                 exit={{ scale: 0.9 }}
-                className="bg-[#111111] border border-zinc-800 rounded-[30px] p-6 w-full max-w-[380px]"
+                className="bg-white/20 backdrop-blur-[80px] border border-white/30 rounded-[38px] p-6 w-full max-w-[390px]"
               >
 
-                <h2 className="text-2xl font-bold mb-6">
+                <h2 className="text-3xl font-bold text-black">
                   Экстренная помощь
                 </h2>
 
-                <div className="space-y-4">
+                <div className="space-y-4 mt-8">
 
                   <button
-                    onClick={() => showToast('Эвакуатор вызван')}
-                    className="w-full bg-[#1A1A1A] p-4 rounded-2xl flex items-center gap-3"
+                    onClick={() => alert('Эвакуатор вызван')}
+                    className="w-full bg-white/20 backdrop-blur-[60px] border border-white/20 rounded-2xl p-5 flex items-center gap-4"
                   >
+
                     <Phone />
-                    Вызвать эвакуатор
+
+                    <span className="text-black">
+                      Вызвать эвакуатор
+                    </span>
+
                   </button>
 
                   <button
-                    onClick={() => showToast('Механик уже едет')}
-                    className="w-full bg-[#1A1A1A] p-4 rounded-2xl flex items-center gap-3"
+                    onClick={() => alert('Механик выехал')}
+                    className="w-full bg-white/20 backdrop-blur-[60px] border border-white/20 rounded-2xl p-5 flex items-center gap-4"
                   >
+
                     <Wrench />
-                    Вызвать механика
+
+                    <span className="text-black">
+                      Вызвать механика
+                    </span>
+
                   </button>
 
                   <button
-                    onClick={() => showToast('Геолокация отправлена')}
-                    className="w-full bg-[#1A1A1A] p-4 rounded-2xl flex items-center gap-3"
+                    onClick={() => alert('Геолокация отправлена')}
+                    className="w-full bg-white/20 backdrop-blur-[60px] border border-white/20 rounded-2xl p-5 flex items-center gap-4"
                   >
+
                     <MapPin />
-                    Отправить геолокацию
+
+                    <span className="text-black">
+                      Отправить геолокацию
+                    </span>
+
                   </button>
 
                 </div>
 
                 <button
                   onClick={() => setEmergencyModal(false)}
-                  className="w-full bg-white text-black py-4 rounded-2xl font-semibold mt-8"
+                  className="w-full mt-8 bg-[#2563EB] text-white py-4 rounded-2xl font-semibold"
                 >
                   Закрыть
                 </button>
 
               </motion.div>
-
-            </motion.div>
-
-          )
-        }
-
-      </AnimatePresence>
-
-      <AnimatePresence>
-
-        {
-          profileModal && (
-
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-5"
-            >
-
-              <motion.div
-                initial={{ scale: 0.9 }}
-                animate={{ scale: 1 }}
-                exit={{ scale: 0.9 }}
-                className="bg-[#111111] border border-zinc-800 rounded-[30px] p-6 w-full max-w-[380px]"
-              >
-
-                {
-                  profileModal === 'history' && (
-
-                    <>
-                      <h2 className="text-2xl font-bold mb-6">
-                        История обслуживания
-                      </h2>
-
-                      <div className="space-y-4">
-
-                        <div className="bg-[#1A1A1A] rounded-2xl p-4">
-                          BMW M5 • Замена масла • Апрель 2026
-                        </div>
-
-                        <div className="bg-[#1A1A1A] rounded-2xl p-4">
-                          Mercedes AMG • Диагностика • Март 2026
-                        </div>
-
-                      </div>
-                    </>
-
-                  )
-                }
-
-                {
-                  profileModal === 'notifications' && (
-
-                    <>
-                      <h2 className="text-2xl font-bold mb-6">
-                        Напоминания
-                      </h2>
-
-                      <div className="space-y-4">
-
-                        <div className="bg-[#1A1A1A] rounded-2xl p-4">
-                          Замена масла через 1200 км
-                        </div>
-
-                        <div className="bg-[#1A1A1A] rounded-2xl p-4">
-                          Рекомендуется диагностика тормозов
-                        </div>
-
-                      </div>
-                    </>
-
-                  )
-                }
-
-                {
-                  profileModal === 'payments' && (
-
-                    <>
-                      <h2 className="text-2xl font-bold mb-6">
-                        Способы оплаты
-                      </h2>
-
-                      <div className="space-y-4">
-
-                        <div className="bg-[#1A1A1A] rounded-2xl p-4">
-                          Visa •••• 2048
-                        </div>
-
-                        <div className="bg-[#1A1A1A] rounded-2xl p-4">
-                          Apple Pay
-                        </div>
-
-                      </div>
-                    </>
-
-                  )
-                }
-
-                <button
-                  onClick={() => setProfileModal(null)}
-                  className="w-full bg-white text-black py-4 rounded-2xl font-semibold mt-8"
-                >
-                  Закрыть
-                </button>
-
-              </motion.div>
-
-            </motion.div>
-
-          )
-        }
-
-      </AnimatePresence>
-
-      <AnimatePresence>
-
-        {
-          toast && (
-
-            <motion.div
-              initial={{ opacity: 0, y: 40 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 40 }}
-              className="fixed bottom-28 left-1/2 -translate-x-1/2 bg-white text-black px-6 py-3 rounded-2xl font-semibold z-[100]"
-            >
-
-              {toast}
 
             </motion.div>
 
