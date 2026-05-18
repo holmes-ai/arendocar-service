@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 
 import {
@@ -107,6 +107,8 @@ export default function App() {
 
   const [emergencyModal, setEmergencyModal] = useState(false)
 
+  const [notification, setNotification] = useState('')
+
   const currentHour = new Date().getHours()
 
   const greeting =
@@ -116,6 +118,19 @@ export default function App() {
       ? 'Добрый день'
       : 'Добрый вечер'
 
+    useEffect(() => {
+
+  if(notification){
+
+    const timer = setTimeout(() => {
+      setNotification('')
+    }, 2200)
+
+    return () => clearTimeout(timer)
+
+  }
+
+}, [notification])
   const filteredServices = useMemo(() => {
 
     return services.filter((service) => {
@@ -303,7 +318,7 @@ export default function App() {
               <div className="grid grid-cols-2 gap-4 mt-6">
 
                 <button
-                  onClick={() => alert('Открыта запись')}
+                  onClick={() => setNotification('Открыта запись')}
                   className="bg-[#2563EB] text-white rounded-[32px] p-5 shadow-[0_25px_50px_rgba(37,99,235,0.35)]"
                 >
 
@@ -608,7 +623,7 @@ export default function App() {
               <div className="space-y-4 mt-6">
 
                 <button
-                  onClick={() => alert('Уведомления открыты')}
+                  onClick={() => setNotification('Уведомления открыты')}
                   className="w-full bg-white/20 backdrop-blur-[60px] border border-white/30 rounded-[28px] p-5 flex items-center justify-between"
                 >
 
@@ -627,7 +642,7 @@ export default function App() {
                 </button>
 
                 <button
-                  onClick={() => alert('Premium активен')}
+                  onClick={() => setNotification('Premium активен')}
                   className="w-full bg-white/20 backdrop-blur-[60px] border border-white/30 rounded-[28px] p-5 flex items-center justify-between"
                 >
 
@@ -646,7 +661,7 @@ export default function App() {
                 </button>
 
                 <button
-                  onClick={() => alert('Настройки открыты')}
+                  onClick={() => setNotification('Настройки открыты')}
                   className="w-full bg-white/20 backdrop-blur-[60px] border border-white/30 rounded-[28px] p-5 flex items-center justify-between"
                 >
 
@@ -665,7 +680,7 @@ export default function App() {
                 </button>
 
                 <button
-                  onClick={() => alert('Карты открыты')}
+                  onClick={() => setNotification('Способы оплаты открыты')}
                   className="w-full bg-white/20 backdrop-blur-[60px] border border-white/30 rounded-[28px] p-5 flex items-center justify-between"
                 >
 
@@ -856,7 +871,7 @@ export default function App() {
                 </div>
 
                 <button
-                  onClick={() => alert('Запись подтверждена')}
+                  onClick={() => setNotification('Запись подтверждена')}
                   className="w-full mt-8 bg-[#2563EB] text-white py-4 rounded-2xl font-semibold"
                 >
                   Продолжить
@@ -906,7 +921,7 @@ export default function App() {
                 <div className="space-y-4 mt-8">
 
                   <button
-                    onClick={() => alert('Эвакуатор вызван')}
+                    onClick={() => setNotification('Эвакуатор вызван')}
                     className="w-full bg-white/20 backdrop-blur-[60px] border border-white/20 rounded-2xl p-5 flex items-center gap-4"
                   >
 
@@ -919,7 +934,7 @@ export default function App() {
                   </button>
 
                   <button
-                    onClick={() => alert('Механик выехал')}
+                    onClick={() => setNotification('Механик выехал')}
                     className="w-full bg-white/20 backdrop-blur-[60px] border border-white/20 rounded-2xl p-5 flex items-center gap-4"
                   >
 
@@ -932,7 +947,7 @@ export default function App() {
                   </button>
 
                   <button
-                    onClick={() => alert('Геолокация отправлена')}
+                    onClick={() => setNotification('Геолокация отправлена')}
                     className="w-full bg-white/20 backdrop-blur-[60px] border border-white/20 rounded-2xl p-5 flex items-center gap-4"
                   >
 
@@ -961,7 +976,32 @@ export default function App() {
         }
 
       </AnimatePresence>
+        <AnimatePresence>
 
+  {
+    notification && (
+
+      <motion.div
+        initial={{ opacity: 0, y: -40 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -40 }}
+        className="fixed top-6 left-1/2 -translate-x-1/2 z-[999]"
+      >
+
+        <div className="bg-white/20 backdrop-blur-[90px] border border-white/30 rounded-[24px] px-6 py-4 shadow-2xl">
+
+          <p className="text-black font-semibold">
+            {notification}
+          </p>
+
+        </div>
+
+      </motion.div>
+
+    )
+  }
+
+</AnimatePresence>
     </div>
   )
 }
